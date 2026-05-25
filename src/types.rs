@@ -1,4 +1,7 @@
+use std::pin::Pin;
+
 /// Storage for tasks.
+
 pub struct Task {
-    task: Pin<Box<dyn Future<Output = ()>>>,
+    pub task: Pin<Box<dyn Future<Output = ()>>>,
 }
