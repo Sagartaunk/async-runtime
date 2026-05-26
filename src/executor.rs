@@ -1,5 +1,5 @@
 use crate::types::Task;
-use crate::waker::dummy_waker;
+use crate::waker::task_waker;
 use std::collections::VecDeque;
 use std::future::Future;
 use std::pin::Pin;
@@ -30,7 +30,7 @@ impl Executor {
             let mut t = self.queue.lock().unwrap();
             t.pop_front()
         } {
-            let waker = dummy_waker();
+            let waker = task_waker(Arc::clone(&task), Arc::clone(&self.queue));
             let mut context = Context::from_waker(&waker);
             let result = {
                 let mut t = task.lock().unwrap();

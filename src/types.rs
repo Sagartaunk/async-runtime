@@ -16,7 +16,7 @@ impl Task {
 }
 /// Stores a copy of the `Executor` queue and a `Task`.
 /// Acts as a storage struct fot the `Waker`.
-struct WakerData {
-    queue: Arc<Mutex<VecDeque<Arc<Mutex<Task>>>>>,
-    task: Arc<Mutex<Task>>,
+pub struct WakerData {
+    pub queue: Arc<Mutex<VecDeque<Arc<Mutex<Task>>>>>,
+    pub task: Arc<Mutex<Task>>,
 }
