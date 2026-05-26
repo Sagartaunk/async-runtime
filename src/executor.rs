@@ -8,7 +8,7 @@ use std::task::{Context, Poll, RawWaker, RawWakerVTable, Waker};
 
 /// Task Executor.
 pub struct Executor {
-    queue: Arc<Mutex<VecDeque<Task>>>,
+    queue: Arc<Mutex<VecDeque<Arc<Mutex<Task>>>>>,
 }
 impl Executor {
     pub fn new() -> Self {
@@ -16,18 +16,27 @@ impl Executor {
             queue: Arc::new(Mutex::new(VecDeque::new())),
         }
     }
-    pub fn add(&mut self, task: Task) {
+    pub fn add(&mut self, task: Arc<Mutex<Task>>) {
         self.queue.lock().unwrap().push_back(task);
     }
+    pub fn spawn(&mut self, task: Task) {
+        self.queue
+            .lock()
+            .unwrap()
+            .push_back(Arc::new(Mutex::new(task)));
+    }
     pub fn run(&mut self) {
-        while let Some(mut task) = {
+        while let Some(task) = {
             let mut t = self.queue.lock().unwrap();
             t.pop_front()
         } {
-            // Todo: Implement this when written.
             let waker = dummy_waker();
             let mut context = Context::from_waker(&waker);
-            match task.task.as_mut().poll(&mut context) {
+            let result = {
+                let mut t = task.lock().unwrap();
+                t.task.as_mut().poll(&mut context)
+            };
+            match result {
                 Poll::Ready(()) => {}
                 Poll::Pending => self.add(task),
             }

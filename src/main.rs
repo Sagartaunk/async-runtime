@@ -12,7 +12,7 @@ mod waker;
 fn main() {
     let task = Task::new(PendingOnce::new());
     let mut exec = Executor::new();
-    exec.add(task);
+    exec.spawn(task);
     exec.run();
 }
 
