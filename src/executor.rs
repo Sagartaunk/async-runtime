@@ -42,7 +42,7 @@ impl Executor {
                     };
                     match result {
                         Poll::Ready(()) => {}
-                        Poll::Pending => self.add(task),
+                        Poll::Pending => {}
                     }
                 }
                 None => {
