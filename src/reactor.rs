@@ -1,6 +1,8 @@
 use std::{collections::HashMap, os::fd::RawFd, task::Waker};
 
-use libc::{EPOLL_CLOEXEC, EPOLL_CTL_ADD, EPOLLIN, epoll_create1, epoll_ctl, epoll_wait};
+use libc::{
+    EPOLL_CLOEXEC, EPOLL_CTL_ADD, EPOLL_CTL_MOD, EPOLLIN, epoll_create1, epoll_ctl, epoll_wait,
+};
 
 pub struct Reactor {
     epoll_fd: RawFd,
@@ -27,10 +29,15 @@ impl Reactor {
             events: EPOLLIN as u32,
             u64: fd as u64,
         };
+        let op = if self.waker.contains_key(&fd) {
+            EPOLL_CTL_MOD
+        } else {
+            EPOLL_CTL_ADD
+        };
         // SAFETY: `epoll_ctl` adds a new fd to be watched. It is the responsibility
         // of the caller to insure that the `fd` being passed is valid. Moreover, the
         // program will panic if the call to add the `fd` failed.
-        let epoll = unsafe { epoll_ctl(self.epoll_fd, EPOLL_CTL_ADD, fd, &mut event) };
+        let epoll = unsafe { epoll_ctl(self.epoll_fd, op, fd, &mut event) };
         assert!(epoll != -1, "epoll_ctl failed");
         self.waker.insert(fd, waker);
     }
