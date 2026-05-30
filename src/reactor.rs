@@ -63,4 +63,8 @@ impl Reactor {
             }
         }
     }
+    /// Check if the `waker` HashMap is empty or not.
+    pub fn is_empty(&self) -> bool {
+        self.waker.is_empty()
+    }
 }
